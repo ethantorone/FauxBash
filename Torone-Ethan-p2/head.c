@@ -3,10 +3,98 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <getopt.h>
 
 #define BUFF_SIZE 1024
+#define DEFAULT_LINES 10
+
+void headLine(int num, char * filename) {
+    printf("%d, %s\n", num, filename);
+
+}
+
+void headByte(int num, char * filename) {
+    printf("%d, %s\n", num, filename);
+
+}
+
+void headIn(int num, char * filename) {
+    printf("%d, %s\n", num, filename);
+
+}
 
 int main(int argc, char* argv[]) {
+
+
+    int num = 0, type = 0, opt = 0;
+
+    char * filename;
+
+    while ((opt = getopt(argc, argv, "n:c:")) != -1) {
+        //printf("%d\n", opt);
+        switch (opt) {
+        case 'n':
+            num = atoi(optarg);
+            type = 'n';
+            //printf("%c: %d or %s\n", type, num, argv[optind]);
+            break;
+        case 'c':
+            num = atoi(optarg);
+            type = 'c';
+            //printf("%c: %d or %s\n", type, num, argv[optind]);
+            break;
+
+        case '?':
+            filename = optarg;
+            puts(filename);
+            break;
+
+        } //switch
+        //printf("%d: %d or %s\n\n",optind, opt, optarg);
+        opt = 0;
+    } //while
+    //printf("%c: %d\n", type, num);
+
+    if (optind < argc) {
+        while (optind < argc) {
+
+            switch (type) {
+            case 'n':
+                headLine(num, argv[optind]);
+                break;
+            case 'c':
+                headByte(num, argv[optind]);
+                break;
+
+            case 0:
+                headLine(DEFAULT_LINES, argv[optind]);
+                break;
+            }
+            optind++;
+        }
+    } else {
+        switch (type) {
+        case 'n':
+            headLine(num, argv[optind]);
+            break;
+        case 'c':
+            headByte(num, argv[optind]);
+            break;
+
+        case 0:
+            headLine(DEFAULT_LINES, argv[optind]);
+        }
+        headIn(num, argv[optind]);
+    }
+    return EXIT_SUCCESS;
+
+
+
+
+
+
+
+/*
     char n = 0;
     int numLines = 10;
     char c = 0;
@@ -64,4 +152,5 @@ int main(int argc, char* argv[]) {
 
     printf("n: %d; numLines: %d; c: %d; numBytes: %d\n", n, numLines, c, numBytes);
     return EXIT_SUCCESS;
+    */
 }
