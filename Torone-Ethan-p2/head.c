@@ -9,17 +9,30 @@
 #define DEFAULT_LINES 10
 
 void headLine(int num, char * filename) {
-    printf("%d, %s\n", num, filename);
+    printf("headLine: %d, %s\n", num, filename);
+    char buffer[BUFF_SIZE];
 
 }
 
 void headByte(int num, char * filename) {
-    printf("%d, %s\n", num, filename);
+    printf("headByte: %d, %s\n", num, filename);
+    char buffer[BUFF_SIZE];
+    int file = open(filename, O_RDONLY, 0644);
+    int wres = 1, wsum = 0;;
+
+    read(file, buffer, BUFF_SIZE);
+    for (int i = 1; (i <= num) & (wres == 1); i++) {
+        write(STDOUT_FILENO, buffer + wsum, 1);
+        wsum += 1;
+        //printf("%d: %d", i, rres);
+    } //for
+    //puts(buffer);
 
 }
 
 void headIn(int num, char * filename) {
-    printf("%d, %s\n", num, filename);
+    printf("headIn: %d, %s\n", num, filename);
+    char buffer[BUFF_SIZE];
 
 }
 
