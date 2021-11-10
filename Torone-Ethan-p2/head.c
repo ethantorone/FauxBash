@@ -8,42 +8,22 @@
 #define BUFF_SIZE 1024
 #define DEFAULT_LINES 10
 
-void headLine(int num, char * filename) {
-    printf("headLine: %d, %s\n", num, filename);
-    char buffer[BUFF_SIZE];
 
-}
+void head(int num, int type, int mode, char * filename) {
+    int rres, file, n = 1;
 
-void headByte(int num, char * filename) {
-    printf("headByte: %d, %s\n", num, filename);
-    char buffer[BUFF_SIZE];
-    int file = open(filename, O_RDONLY, 0644);
-    int wres = 1, wsum = 0;;
 
-    read(file, buffer, BUFF_SIZE);
-    for (int i = 1; (i <= num) & (wres == 1); i++) {
-        write(STDOUT_FILENO, buffer + wsum, 1);
-        wsum += 1;
-        //printf("%d: %d", i, rres);
-    } //for
-    //puts(buffer);
 
-}
-
-void headIn(int num, char * filename) {
-    printf("headIn: %d, %s\n", num, filename);
-    char buffer[BUFF_SIZE];
 
 }
 
 int main(int argc, char* argv[]) {
 
-
-    int num = 0, type = 0, opt = 0;
+    int num = 0, type = 0, mode = 0, opt = 0;
 
     char * filename;
 
-    while ((opt = getopt(argc, argv, "n:c:")) != -1) {
+    while ((opt = getopt(argc, argv, "n:c:vq")) != -1) {
         //printf("%d\n", opt);
         switch (opt) {
         case 'n':
@@ -56,7 +36,12 @@ int main(int argc, char* argv[]) {
             type = 'c';
             //printf("%c: %d or %s\n", type, num, argv[optind]);
             break;
-
+        case 'v':
+            mode = 'v';
+            break;
+        case 'q':
+            mode = 'q';
+            break;
         case '?':
             filename = optarg;
             puts(filename);
@@ -67,38 +52,8 @@ int main(int argc, char* argv[]) {
         opt = 0;
     } //while
     //printf("%c: %d\n", type, num);
+    head(num, type, mode, filename);)
 
-    if (optind < argc) {
-        while (optind < argc) {
-
-            switch (type) {
-            case 'n':
-                headLine(num, argv[optind]);
-                break;
-            case 'c':
-                headByte(num, argv[optind]);
-                break;
-
-            case 0:
-                headLine(DEFAULT_LINES, argv[optind]);
-                break;
-            }
-            optind++;
-        }
-    } else {
-        switch (type) {
-        case 'n':
-            headLine(num, argv[optind]);
-            break;
-        case 'c':
-            headByte(num, argv[optind]);
-            break;
-
-        case 0:
-            headLine(DEFAULT_LINES, argv[optind]);
-        }
-        headIn(num, argv[optind]);
-    }
     return EXIT_SUCCESS;
 
 
