@@ -10,19 +10,37 @@
 
 
 void head(int num, int type, int mode, char * filename) {
-    int rres, file, n = 1;
+    //printf("%s: %d, %d, %d\n", filename, mode, type, num);
+    int rres, wres, file, n = 1;
+    char buffer[BUFF_SIZE];
 
+    if (filename == NULL) {
+        file = STDIN_FILENO;
+    } else {
+        file = open(filename, O_RDONLY);
+    }
 
+    if (mode == 'v') {
+        printf("==> %s <==", filename);
+    }
 
-
+    while ((rres = read(file, buffer, BUFF_SIZE)) > 0 && n <= num) {
+        wres = 0;
+        for (int i = 0; (i < rres) && n <= num; i++) {
+            wres += write(STDOUT_FILENO, buffer + wres, 1);
+            if (buffer[i] == '\n' && type != 'c') {
+                n++;
+            } else if (type == 'c') {
+                n++;
+            }
+        }
+    }
+    close(file);
 }
 
 int main(int argc, char* argv[]) {
 
-    int num = 0, type = 0, mode = 0, opt = 0;
-
-    char * filename;
-
+    int num = 10, type = 0, mode = 0, opt = 0;
     while ((opt = getopt(argc, argv, "n:c:vq")) != -1) {
         //printf("%d\n", opt);
         switch (opt) {
@@ -43,8 +61,8 @@ int main(int argc, char* argv[]) {
             mode = 'q';
             break;
         case '?':
-            filename = optarg;
-            puts(filename);
+            perror("invalid option\n");
+            exit(1);
             break;
 
         } //switch
@@ -52,73 +70,13 @@ int main(int argc, char* argv[]) {
         opt = 0;
     } //while
     //printf("%c: %d\n", type, num);
-    head(num, type, mode, filename);)
-
-    return EXIT_SUCCESS;
-
-
-
-
-
-
-
-/*
-    char n = 0;
-    int numLines = 10;
-    char c = 0;
-    int numBytes = 0;
-
-    char * filename = argv[argc - 1];
-    int file = open(filename, O_RDONLY, 0644);
-    if (file == -1) {
-        file = STDIN_FILENO;
-    }
-
-    char buffer[BUFF_SIZE];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '-') {
-            if (argv[i][1] == 'n') {
-                n = 1;
-                numLines = atoi(argv[i + 1]);
-            } //if
-            if (argv[i][1] == 'c') {
-                c = 1;
-                numBytes = atoi(argv[i + 1]);
-            } //if
-        } //if
-    } //for
-
-    int rres;
-    int wres = 0;
-    int buffLength;
-
-    if (n == 1) {
-
-        for (int i = 0; (i < numLines) & (wres <= buffLength); i++) {
-
-            read(file, buffer, BUFF_SIZE);
-            buffLength = strlen(buffer);
-            wres = 0;
-            while (wres < buffLength) {
-                wres += write(STDOUT_FILENO, buffer + wres, 1);
-                if (!(buffer[wres] == '\n')) {
-                    i--;
-                }
-            }
-        }
-    } else if (c == 1) {
-        read(file, buffer, BUFF_SIZE);
-        buffLength = strlen(buffer);
-        for (int i = 1; i <= numBytes; i++) {
-
+    if (optind < argc) {
+        while (optind < argc) {
+            head(num, type, mode, argv[optind]);
+            optind++;
         }
     } else {
-
+        head(num, type, mode, STDIN_FILENO);
     }
-
-
-    printf("n: %d; numLines: %d; c: %d; numBytes: %d\n", n, numLines, c, numBytes);
     return EXIT_SUCCESS;
-    */
 }
