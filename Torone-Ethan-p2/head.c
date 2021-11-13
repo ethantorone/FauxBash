@@ -70,6 +70,12 @@ int main(int argc, char* argv[]) {
         opt = 0;
     } //while
     //printf("%c: %d\n", type, num);
+
+    if (num < 0) {
+        perror("invalid argument: negative\n");
+        exit(2);
+    }
+
     if (optind < argc) {
         while (optind < argc) {
             head(num, type, mode, argv[optind]);
