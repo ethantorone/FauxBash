@@ -9,38 +9,49 @@
 #define DEFAULT_LINES 10
 
 
-void head(int num, int type, int mode, char * filename) {
+void tail(int num, int type, int mode, char * filename) {
     //printf("%s: %d, %d, %d\n", filename, mode, type, num);
-    int rres, wres, file, n = 1;
+    int file, rres, wres, n = 1, offset = 1, lres;
     char buffer[BUFF_SIZE];
 
     if (filename == NULL) {
         file = STDIN_FILENO;
     } else if ( ( file = open(filename, O_RDONLY) ) < 1) {
         //printf("%d\n", file);
-        perror("head: cannot open file for reading");
+        perror("tail: cannot open file for reading");
         exit(EXIT_FAILURE);
     }
 
     if (mode == 'v') {
         printf("==> %s <==", filename);
     }
-
-    while ((rres = read(file, buffer, BUFF_SIZE)) > 0 && n <= num) {
-        wres = 0;
-        for (int i = 0; (i < rres) && n <= num; i++) {
-            wres += write(STDOUT_FILENO, buffer + wres, 1);
+    num++;
+    while ((lres = lseek(file, -1 * offset, SEEK_END)) > 0 &&
+        (rres = read(file, buffer, 1)) > 0 &&
+        n <= num) {
+        //printf("%d\n", lres);
+        for (int i = 0; i < rres && n <= num; i++) {
             if (buffer[i] == '\n' && type != 'c') {
                 n++;
-            } else if (type == 'c') {
+            } else if(type == 'c') {
                 n++;
             }
         }
+        offset += rres;
     }
+    lseek(file, 1, SEEK_CUR);
+    while ((rres = read(file, buffer, BUFF_SIZE)) > 0) {
+        wres = 0;
+        for (int i = 0; i < rres; i++) {
+            wres += write(STDOUT_FILENO, buffer + wres, 1);
+        }
+    }
+
     close(file);
 }
 
-int main(int argc, char* argv[]) {
+
+int main(int argc, char * argv[]) {
 
     int num = 10, type = 0, mode = 0, opt = 0;
     while ((opt = getopt(argc, argv, "n:c:vq")) != -1) {
@@ -80,11 +91,12 @@ int main(int argc, char* argv[]) {
 
     if (optind < argc) {
         while (optind < argc) {
-            head(num, type, mode, argv[optind]);
+            tail(num, type, mode, argv[optind]);
             optind++;
         }
     } else {
-        head(num, type, mode, STDIN_FILENO);
+        tail(num, type, mode, STDIN_FILENO);
     }
     return EXIT_SUCCESS;
+
 }

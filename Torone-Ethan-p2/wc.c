@@ -75,7 +75,7 @@ void wc(int mode, char * filename) {
         printf("%d\t", bytes);
     }
     printf("%s\n", filename);
-
+    close(file);
 }
 
 
