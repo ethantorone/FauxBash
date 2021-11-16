@@ -8,7 +8,15 @@
 #define BUFF_SIZE 1024
 #define DEFAULT_LINES 10
 
-
+/**
+ * Writes the last {@code num} lines or bytes of the specified file
+ * to standard output.
+ *
+ * @param num the number of desired lines/bytes to be printed
+ * @param type determines if the function writes an amount of lines or btyes
+ * @param mode determines if the function writes a banner ahead of the content
+ * @param filename the name of the desired file
+ */
 void tail(int num, int type, int mode, char * filename) {
     //printf("%s: %d, %d, %d\n", filename, mode, type, num);
     int file, rres, wres, n = 1, offset = 1, lres;
@@ -25,7 +33,12 @@ void tail(int num, int type, int mode, char * filename) {
     if (mode == 'v') {
         printf("==> %s <==", filename);
     }
+
     num++;
+
+    //iterates the offset backwards through the file while counting next-lines
+    // or bytes; one more than desired because you want to print everything after
+    // the n+1th nextline
     while ((lres = lseek(file, -1 * offset, SEEK_END)) > 0 &&
         (rres = read(file, buffer, 1)) > 0 &&
         n <= num) {
@@ -39,7 +52,12 @@ void tail(int num, int type, int mode, char * filename) {
         }
         offset += rres;
     }
+
+    //you want to print everything after the n+1th nextline
     lseek(file, 1, SEEK_CUR);
+
+    //starts reading the file from the offset and writing
+    // it to standard output
     while ((rres = read(file, buffer, BUFF_SIZE)) > 0) {
         wres = 0;
         for (int i = 0; i < rres; i++) {
@@ -51,9 +69,14 @@ void tail(int num, int type, int mode, char * filename) {
 }
 
 
+/**
+ * Parses command-line arguments and calls tail() on all the files.
+ */
 int main(int argc, char * argv[]) {
 
     int num = 10, type = 0, mode = 0, opt = 0;
+
+    //parses options and arguments
     while ((opt = getopt(argc, argv, "n:c:vq")) != -1) {
         //printf("%d\n", opt);
         switch (opt) {
@@ -86,7 +109,7 @@ int main(int argc, char * argv[]) {
 
     if (num < 0) {
         perror("invalid argument: negative\n");
-        exit(2);
+        exit(EXIT_FAILURE);
     }
 
     if (optind < argc) {

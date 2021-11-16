@@ -3,21 +3,30 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
-#include <getopt.h>
 
 #define BUFF_SIZE 1024
 #define DEFAULT_LINES 10
 
-
+/**
+ * Writes the first {@code num} lines or bytes of the specified file
+ * to standard output.
+ *
+ * @param num the number of desired lines/bytes to be printed
+ * @param type determines if the function writes an amount of lines or btyes
+ * @param mode determines if the function writes a banner ahead of the content
+ * @param filename the name of the desired file
+ */
 void head(int num, int type, int mode, char * filename) {
     //printf("%s: %d, %d, %d\n", filename, mode, type, num);
     int rres, wres, file, n = 1;
     char buffer[BUFF_SIZE];
 
+    //if no filename is passed, then program reads from standard input
     if (filename == NULL) {
         file = STDIN_FILENO;
     } else if ( ( file = open(filename, O_RDONLY) ) < 1) {
         //printf("%d\n", file);
+        //if there's an error with opening the file, then program stops
         perror("head: cannot open file for reading");
         exit(EXIT_FAILURE);
     }
@@ -26,8 +35,12 @@ void head(int num, int type, int mode, char * filename) {
         printf("==> %s <==", filename);
     }
 
+    //repeatedly reads the file, stops if there is no more content to read or
+    //if specified number of lines/bytes have been written
     while ((rres = read(file, buffer, BUFF_SIZE)) > 0 && n <= num) {
         wres = 0;
+        //writes byte-by-byte to standard output until whats read into the buffer
+        //has been written or if the specified number of lines/bytes has been written
         for (int i = 0; (i < rres) && n <= num; i++) {
             wres += write(STDOUT_FILENO, buffer + wres, 1);
             if (buffer[i] == '\n' && type != 'c') {
@@ -40,9 +53,18 @@ void head(int num, int type, int mode, char * filename) {
     close(file);
 }
 
+
+/**
+ * Parses command-line arguments and calls head() on all the files.
+ *
+ * @param argc argument count
+ * @param argv arguments
+ */
 int main(int argc, char* argv[]) {
 
-    int num = 10, type = 0, mode = 0, opt = 0;
+    int num = DEFAULT_LINES, type = 0, mode = 0, opt = 0;
+
+    //parses options and arguments
     while ((opt = getopt(argc, argv, "n:c:vq")) != -1) {
         //printf("%d\n", opt);
         switch (opt) {
